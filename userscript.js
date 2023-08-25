@@ -9,6 +9,9 @@
 // @description 滚啊！总结Bot
 // @namespace   https://github.com/Redlnn/fxxx-ai-bot
 // @run-at      document-idle
+// @license     AGPL-3.0-only
+// @supportURL  https://github.com/Redlnn/fxxx-ai-bot
+// @homepageURL https://github.com/Redlnn/fxxx-ai-bot
 // ==/UserScript==
 
 const banList = {
