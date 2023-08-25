@@ -61,35 +61,26 @@ async function modReply(listDom, replyDom) {
   // 判断主楼发表用户
   const userName = replyDom.querySelector('.root-reply-container .root-reply-avatar')
   if (banList.summary.includes(userName.getAttribute('data-user-id'))) {
-    if (subReplyList.length === 0)
-    {
+    if (subReplyList.length === 0) {
       replyDom.style.background = '#FFB7B7'
-    }
-    else
-    {
+    } else {
       rootReply.style.background = '#FFB7B7'
     }
-  }
-  else
-  {
-    replyDom.style.background = '#D4E2D4'
   }
 
   // 判断主楼首层被@用户
   const atList = replyDom.querySelectorAll('.jump-link.user')
-  if (atList.length === 0) return
-  atList.forEach(async (at) => {
-    if (banList.summary.includes(at.getAttribute('data-user-id'))) {
-      if (subReplyList.length === 0)
-      {
-        replyDom.style.background = '#FFB7B7'
+  if (atList.length > 0) {
+    atList.forEach(async (at) => {
+      if (banList.summary.includes(at.getAttribute('data-user-id'))) {
+        if (subReplyList.length === 0) {
+          replyDom.style.background = '#FFB7B7'
+        } else {
+          rootReply.style.background = '#FFB7B7'
+        }
       }
-      else
-      {
-        rootReply.style.background = '#FFB7B7'
-      }
-    }
-  })
+    })
+  }
 
   if (subReplyList.length > 0) {
     subReplyList.forEach(async (subReplyDom) => {
