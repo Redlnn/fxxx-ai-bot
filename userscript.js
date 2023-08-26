@@ -3,6 +3,7 @@
 // @name:zh     滚啊！总结Bot
 // @match       *://www.bilibili.com/*
 // @match       *://t.bilibili.com/*
+// @match       *://space.bilibili.com/*
 // @grant       none
 // @version     1.0
 // @author      Red_lnn
@@ -51,6 +52,9 @@ const banList = {
 }
 
 const watchingReplyDomList = []
+const watchingCommentDomList = []
+
+// -----------------------
 
 async function modReply(listDom, replyDom) {
   if (!replyDom.classList.contains('reply-item')) return
@@ -66,6 +70,11 @@ async function modReply(listDom, replyDom) {
     } else {
       rootReply.style.background = '#FFB7B7'
     }
+
+    replyDom.style.transition = 'all 0.3s'
+    replyDom.style['-webkit-transition'] = 'all 0.3s'
+    replyDom.style.heiht = '0'
+    replyDom.style.display = 'none'
   }
 
   // 判断主楼首层被@用户
@@ -78,6 +87,11 @@ async function modReply(listDom, replyDom) {
         } else {
           rootReply.style.background = '#FFB7B7'
         }
+
+        replyDom.style.transition = 'all 0.3s'
+        replyDom.style['-webkit-transition'] = 'all 0.3s'
+        replyDom.style.heiht = '0'
+        replyDom.style.display = 'none'
       }
     })
   }
@@ -88,16 +102,27 @@ async function modReply(listDom, replyDom) {
       const userName = subReplyDom.querySelector('.sub-reply-container .sub-reply-avatar')
       if (banList.summary.includes(userName.getAttribute('data-user-id'))) {
         subReplyDom.style.background = '#FFB7B7'
+
+        subReplyDom.style.transition = 'all 0.3s'
+        subReplyDom.style['-webkit-transition'] = 'all 0.3s'
+        subReplyDom.style.heiht = '0'
+        subReplyDom.style.display = 'none'
       }
 
       // 判断子楼首层被@用户
       const atList = subReplyDom.querySelectorAll('.jump-link.user')
-      if (atList.length == 0) return
-      atList.forEach(async (at) => {
-        if (banList.summary.includes(at.getAttribute('data-user-id'))) {
-          subReplyDom.style.background = '#FFB7B7'
-        }
-      })
+      if (atList.length > 0) {
+        atList.forEach(async (at) => {
+          if (banList.summary.includes(at.getAttribute('data-user-id'))) {
+            subReplyDom.style.background = '#FFB7B7'
+
+            subReplyDom.style.transition = 'all 0.3s'
+            subReplyDom.style['-webkit-transition'] = 'all 0.3s'
+            subReplyDom.style.heiht = '0'
+            subReplyDom.style.display = 'none'
+          }
+        })
+      }
     })
   }
 }
@@ -107,7 +132,7 @@ function watchReplyList(dom) {
   const observer = new MutationObserver(async (records, itself) => {
     records.forEach(async (record) => {
       for (let node of record.addedNodes) {
-        if (node.classList.contains('reply-item')) {
+        if (node.classList && node.classList.contains('reply-item')) {
           await modReply(record.target, node)
         }
       }
@@ -116,23 +141,115 @@ function watchReplyList(dom) {
   observer.observe(dom, { childList: true, subtree: true })
 }
 
+// -----------------------
+
+async function modComment(listDom, commentDom) {
+  if (!commentDom.classList.contains('list-item')) return
+
+  const rootComment = commentDom.querySelector('.con')
+  const subCommentList = commentDom.querySelectorAll('.reply-item')
+
+  // 判断主楼发表用户
+  const userName = commentDom.querySelector('.user-face a')
+  if (banList.summary.includes(userName.getAttribute('data-usercard-mid'))) {
+    if (subCommentList.length === 0) {
+      commentDom.style.background = '#FFB7B7'
+    } else {
+      commentDom.querySelector('.con > .text').style.background = '#FFB7B7'
+    }
+  }
+
+  // 判断主楼首层被@用户
+  const linktList = commentDom.querySelectorAll('.con > .text a')
+  if (linktList.length > 0) {
+    linktList.forEach(async (link) => {
+      var linkAttr = link.getAttribute('data-usercard-mid')
+      if (linkAttr === null) return
+      if (banList.summary.includes(linkAttr)) {
+        if (subCommentList.length === 0) {
+          commentDom.style.background = '#FFB7B7'
+        } else {
+          commentDom.querySelector('.con > .text').style.background = '#FFB7B7'
+        }
+      }
+    })
+  }
+
+  if (subCommentList.length > 0) {
+    subCommentList.forEach(async (subCommentDom) => {
+      // 判断子楼发表用户
+      const userName = subCommentDom.querySelector('.reply-face')
+      if (banList.summary.includes(userName.getAttribute('data-usercard-mid'))) {
+        subCommentDom.style.background = '#FFB7B7'
+      }
+
+      // 判断子楼首层被@用户
+      const linktList = subCommentDom.querySelectorAll('.text-con a')
+      if (linktList.length > 0) {
+        linktList.forEach(async (link) => {
+          var linkAttr = link.getAttribute('data-usercard-mid')
+          if (linkAttr === null) return
+          if (banList.summary.includes(linkAttr)) {
+            subCommentDom.style.background = '#FFB7B7'
+          }
+        })
+      }
+    })
+  }
+}
+
+// function watchCommentList(dom) {
+//   const MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver
+//   const observer = new MutationObserver(async (records, itself) => {
+//     records.forEach(async (record) => {
+//       for (let node of record.addedNodes) {
+//         if (node.classList && node.classList.contains('list-item')) {
+//           await modComment(record.target, node)
+//         }
+//       }
+//     })
+//   })
+//   observer.observe(dom, { childList: true, subtree: true })
+// }
+
+// -----------------------
+
 ;(async function () {
   console.log('%c "@bot Cleaner" is loaded! ', 'font-size:16px;font-weight:bold;color:black;background:#f7971e')
 
-  setInterval(() => {
-    var replayListDoms = document.querySelectorAll('.reply-list')
-    if (replayListDoms) {
-      replayListDoms.forEach(async (replayListDom) => {
-        if (!watchingReplyDomList.includes(replayListDom)) {
-          watchingReplyDomList.push(replayListDom)
-          replayListDom.childNodes.forEach(async (node) => {
-            if (node.classList.contains('reply-item')) {
-              await modReply(replayListDom, node)
+  if (['www.bilibili.com', 't.bilibili.com'].includes(document.domain)) {
+    setInterval(() => {
+      var replayListDoms = document.querySelectorAll('.reply-list')
+      if (replayListDoms.length > 0) {
+        replayListDoms.forEach(async (replayListDom) => {
+          if (!watchingReplyDomList.includes(replayListDom)) {
+            watchingReplyDomList.push(replayListDom)
+            replayListDom.childNodes.forEach(async (node) => {
+              if (node.classList.contains('reply-item')) {
+                await modReply(replayListDom, node)
+              }
+            })
+            watchReplyList(replayListDom)
+          }
+        })
+      }
+    }, 1000)
+  }
+
+  // 由于子评论翻页无法被主楼的MutationObserver监视，直接使用暴力刷新~
+  if (document.domain === 'space.bilibili.com') {
+    setInterval(() => {
+      var commentListDoms = document.querySelectorAll('.comment-list')
+      if (commentListDoms.length > 0) {
+        commentListDoms.forEach(async (commentListDom) => {
+          watchingCommentDomList.push(commentListDom)
+          commentListDom.childNodes.forEach(async (node) => {
+            if (node.classList.contains('list-item')) {
+              await modComment(commentListDom, node)
             }
           })
-          watchReplyList(replayListDom)
-        }
-      })
-    }
-  }, 1000)
+        })
+      }
+    }, 1000)
+  }
 })()
